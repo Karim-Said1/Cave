@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { loadSheetData } from "../utils/googleSheets";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -34,29 +34,25 @@ function haversine(lat1, lon1, lat2, lon2) {
 
 // --- Main Trip Assignment Logic: All Phases (adapted from trip_assignment.py) ---
 
-const VEHICLE_TYPES = [
-  { label: "Jumbo", value: "jumbo", DIMENSION_MAX: 13.6, WEIGHT_MAX: 6000 },
-  { label: "Dababa", value: "dababa", DIMENSION_MAX: 4.9, WEIGHT_MAX: 1800 },
-  { label: "Suzuki", value: "suzuki", DIMENSION_MAX: 2.5, WEIGHT_MAX: 800 },
-];
+// Use fixed values for vehicle limits (e.g., Dababa)
+const DIMENSION_MAX = 4.9;
+const WEIGHT_MAX = 1800;
+const MERGED_DIMENSION_MAX = DIMENSION_MAX + 0.1;
+const MAX_TRIP_DISTANCE = 60;
+const MAX_CUSTOMER_DISTANCE = 20;
+const SECOND_MERGE_THRESHOLD = 2.0;
+const FAR_AWAY_THRESHOLD = 30;
+const DEFAULT_DIMENSION = 0.1;
+const DEFAULT_WEIGHT = 0.1;
+const MAX_SUPPLIER_DISTANCE = 5;
+const MAX_DIRECTION_DIFF = 0.5;
 
-function assignTrips(data, vehicleType = "dababa") {
+function assignTrips(data) {
   if (!data || data.length === 0) return [];
   // Helper to get column value with fallback
   const getCol = (row, key) => row[key] ?? row[key.toLowerCase()] ?? row[key.toUpperCase()];
   // Vehicle limits
-  const vehicle = VEHICLE_TYPES.find(v => v.value === vehicleType) || VEHICLE_TYPES[1];
-  const DIMENSION_MAX = vehicle.DIMENSION_MAX;
-  const WEIGHT_MAX = vehicle.WEIGHT_MAX;
   const MERGED_DIMENSION_MAX = DIMENSION_MAX + 0.1; // Keep a small buffer for merging
-  const MAX_TRIP_DISTANCE = 60;
-  const MAX_CUSTOMER_DISTANCE = 20;
-  const SECOND_MERGE_THRESHOLD = 2.0;
-  const FAR_AWAY_THRESHOLD = 30;
-  const DEFAULT_DIMENSION = 0.1;
-  const DEFAULT_WEIGHT = 0.1;
-  const MAX_SUPPLIER_DISTANCE = 5;
-  const MAX_DIRECTION_DIFF = 0.5;
 
   // --- Phase 1: Initial trip formation ---
   // Prepare supplier locations and warehouse areas
@@ -273,26 +269,12 @@ function assignTrips(data, vehicleType = "dababa") {
   }
 
   // --- Phase 3: Cross-supplier merging (merge trips from nearby suppliers with similar direction) ---
-  // For brevity, only a basic merge by supplier proximity and direction is implemented.
-  // You can expand this logic as needed to match your full Python implementation.
   let phase3Trips = phase2Merged;
-  let mergedTripIdMap = {};
-  let mergedTripCounter = 1;
-  phase3Trips.forEach(trip => {
-    // Assign merged trip id if not already assigned
-    if (!mergedTripIdMap[trip.tripId]) {
-      mergedTripIdMap[trip.tripId] = `Merged_Trip_${mergedTripCounter++}`;
-    }
-    trip.orders.forEach(o => {
-      o.Merged_Trip_ID = mergedTripIdMap[trip.tripId];
-    });
-  });
 
   // --- Final assignment to data ---
   return data.map(row => ({
     ...row,
-    Trip_ID: orderTripMap[getCol(row, "id")] || "",
-    Merged_Trip_ID: row.Merged_Trip_ID || mergedTripIdMap[orderTripMap[getCol(row, "id")]] || ""
+    Trip_ID: orderTripMap[getCol(row, "id")] || ""
   }));
 }
 
@@ -362,80 +344,6 @@ const TripAssignment = () => {
   const [showSummary, setShowSummary] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [phase, setPhase] = useState(0); // 0=idle, 1=measuring, 2=loading, 3=done, 4=summary
-  const [vehicleType, setVehicleType] = useState(VEHICLE_TYPES[1].value); // Default to Dababa
-  const [allSuppliers, setAllSuppliers] = useState([]);
-  const [selectedSuppliers, setSelectedSuppliers] = useState([]);
-  const [truckType, setTruckType] = useState(VEHICLE_TYPES[1].value);
-  const [truckCount, setTruckCount] = useState(1);
-  const [limitMode, setLimitMode] = useState(false); // false = original, true = supplier/truck limit
-  const [showSupplierLimitBox, setShowSupplierLimitBox] = useState(false);
-  const [selectedSupplierForBox, setSelectedSupplierForBox] = useState("");
-  const [truckTypeForBox, setTruckTypeForBox] = useState(VEHICLE_TYPES[1].value);
-  const [truckCountForBox, setTruckCountForBox] = useState(1);
-
-  // Load all unique suppliers from tasksData
-  useEffect(() => {
-    if (tasksData && tasksData.length > 0) {
-      const uniqueSuppliers = Array.from(
-        new Set(tasksData.map(row => row.supplier_name).filter(Boolean))
-      );
-      setAllSuppliers(uniqueSuppliers);
-    }
-  }, [tasksData]);
-
-  // --- Limited assignment logic ---
-  function assignTripsWithSupplierLimit(data, supplierList, truckType, truckCount) {
-    if (!data || data.length === 0 || !supplierList.length) return [];
-    // Only assign for selected suppliers, others remain unassigned
-    const vehicle = VEHICLE_TYPES.find(v => v.value === truckType) || VEHICLE_TYPES[1];
-    const DIMENSION_MAX = vehicle.DIMENSION_MAX * truckCount;
-    const WEIGHT_MAX = vehicle.WEIGHT_MAX * truckCount;
-    // Filter data for selected suppliers
-    const filtered = data.filter(row => supplierList.includes(row.supplier_name));
-    // Assign trips as before, but limit total cbm/weight per supplier
-    let assigned = [];
-    let supplierTotals = {};
-    filtered.forEach(row => {
-      const sup = row.supplier_name;
-      if (!supplierTotals[sup]) supplierTotals[sup] = { cbm: 0, weight: 0, orders: [] };
-      supplierTotals[sup].cbm += safeFloat(row.order_dimension);
-      supplierTotals[sup].weight += safeFloat(row["Total Order Weight / KG"]);
-      supplierTotals[sup].orders.push(row);
-    });
-    Object.entries(supplierTotals).forEach(([sup, totals]) => {
-      let cbm = 0, weight = 0, tripNum = 1;
-      let tripOrders = [];
-      totals.orders.forEach(order => {
-        const orderCBM = safeFloat(order.order_dimension);
-        const orderWeight = safeFloat(order["Total Order Weight / KG"]);
-        if (
-          cbm + orderCBM > DIMENSION_MAX ||
-          weight + orderWeight > WEIGHT_MAX
-        ) {
-          // Start new trip
-          tripNum += 1;
-          cbm = 0;
-          weight = 0;
-          tripOrders = [];
-        }
-        cbm += orderCBM;
-        weight += orderWeight;
-        assigned.push({
-          ...order,
-          Trip_ID: `${sup}_Trip_${tripNum}`,
-          Merged_Trip_ID: `${sup}_Trip_${tripNum}` // For simplicity
-        });
-      });
-    });
-    // For non-selected suppliers, keep as is (unassigned)
-    const rest = data.filter(row => !supplierList.includes(row.supplier_name));
-    assigned = assigned.concat(rest.map(row => ({
-      ...row,
-      Trip_ID: "",
-      Merged_Trip_ID: ""
-    })));
-    return assigned;
-  }
 
   // Download the current Tasks sheet as Excel
   const handleDownloadTasks = () => {
@@ -500,7 +408,7 @@ const TripAssignment = () => {
         const runsheetWithCBM = calculateRunsheetCBMWeight(runsheet, fallback);
         const updated = aggregateOrderMetrics(tasks, runsheetWithCBM);
         setPhase1Data(updated);
-        const res = assignTrips(updated, vehicleType);
+        const res = assignTrips(updated);
         setResults(res);
       } catch (e) {
         setError("Process failed: " + (e?.message || e));
@@ -555,51 +463,6 @@ const TripAssignment = () => {
     };
   }, [results]);
 
-  // --- Vehicle Dropdown UI (styled to match buttons) ---
-  const renderVehicleDropdown = () => (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        background: "linear-gradient(90deg, #2563eb 0%, #38bdf8 100%)",
-        borderRadius: 8,
-        padding: "0 18px",
-        height: 48,
-        marginRight: 8,
-        boxShadow: "0 2px 8px 0 rgba(37,99,235,0.08)",
-        minWidth: 210
-      }}
-    >
-      <label style={{ fontWeight: 600, color: "#fff", marginRight: 10, fontSize: 16, minWidth: 90 }}>
-        Vehicle Type:
-      </label>
-      <select
-        value={vehicleType}
-        onChange={e => setVehicleType(e.target.value)}
-        style={{
-          padding: "8px 16px",
-          borderRadius: 6,
-          border: "none",
-          fontSize: 16,
-          fontWeight: 600,
-          background: "#fff",
-          color: "#2563eb",
-          minWidth: 90,
-          outline: "none",
-          cursor: loading || phase === 1 ? "not-allowed" : "pointer",
-          opacity: loading || phase === 1 ? 0.7 : 1,
-        }}
-        disabled={loading || phase === 1}
-      >
-        {VEHICLE_TYPES.map(v => (
-          <option key={v.value} value={v.value}>
-            {v.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-
   // UI
   return (
     <div
@@ -650,7 +513,7 @@ const TripAssignment = () => {
         </div>
       </div>
 
-      {/* Action Buttons + Vehicle Dropdown + Supplier/Truck Limit Option */}
+      {/* Action Buttons */}
       <div
         style={{
           background: "#fff",
@@ -664,7 +527,6 @@ const TripAssignment = () => {
           flexWrap: "wrap"
         }}
       >
-        {renderVehicleDropdown()}
         <button
           onClick={handleStart}
           disabled={loading}
@@ -730,189 +592,7 @@ const TripAssignment = () => {
             Download Assigned Trips
           </button>
         )}
-        {/* --- New: Supplier/Truck Limit as last option --- */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginLeft: "auto" }}>
-          <button
-            onClick={() => setShowSupplierLimitBox(true)}
-            style={{
-              background: "linear-gradient(90deg, #be123c 0%, #fbbf24 100%)",
-              color: "#fff",
-              padding: "12px 28px",
-              borderRadius: 8,
-              fontWeight: 700,
-              fontSize: 16,
-              border: "none",
-              cursor: "pointer",
-              boxShadow: "0 2px 8px 0 rgba(251,191,36,0.08)",
-              minWidth: 180
-            }}
-          >
-            Assign for Specific Supplier
-          </button>
-        </div>
       </div>
-
-      {/* Supplier Limit Modal/Box */}
-      {showSupplierLimitBox && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0, left: 0, width: "100vw", height: "100vh",
-            background: "rgba(0,0,0,0.18)",
-            zIndex: 1000,
-            display: "flex", alignItems: "center", justifyContent: "center"
-          }}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: 16,
-              padding: "36px 32px",
-              boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.18)",
-              minWidth: 420,
-              maxWidth: 500,
-              textAlign: "center"
-            }}
-          >
-            <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 18, color: "#be123c" }}>
-              Assign Trips for a Specific Supplier
-            </div>
-            <div style={{ marginBottom: 18 }}>
-              <label style={{ fontWeight: 600, color: "#2563eb", fontSize: 16, marginRight: 10 }}>
-                Supplier:
-              </label>
-              <select
-                value={selectedSupplierForBox || ""}
-                onChange={e => setSelectedSupplierForBox(e.target.value)}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: 6,
-                  border: "1px solid #cbd5e1",
-                  fontSize: 16,
-                  minWidth: 180
-                }}
-              >
-                <option value="" disabled>Select supplier</option>
-                {allSuppliers.map(sup => (
-                  <option key={sup} value={sup}>{sup}</option>
-                ))}
-              </select>
-            </div>
-            <div style={{ marginBottom: 18 }}>
-              <label style={{ fontWeight: 600, color: "#2563eb", fontSize: 16, marginRight: 10 }}>
-                Truck Type:
-              </label>
-              <select
-                value={truckTypeForBox}
-                onChange={e => setTruckTypeForBox(e.target.value)}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: 6,
-                  border: "1px solid #cbd5e1",
-                  fontSize: 16,
-                  minWidth: 120
-                }}
-              >
-                {VEHICLE_TYPES.map(v => (
-                  <option key={v.value} value={v.value}>{v.label}</option>
-                ))}
-              </select>
-            </div>
-            <div style={{ marginBottom: 18 }}>
-              <label style={{ fontWeight: 600, color: "#2563eb", fontSize: 16, marginRight: 10 }}>
-                Truck Count:
-              </label>
-              <input
-                type="number"
-                min={1}
-                value={truckCountForBox}
-                onChange={e => setTruckCountForBox(Number(e.target.value))}
-                style={{
-                  width: 60,
-                  padding: "8px 10px",
-                  borderRadius: 6,
-                  border: "1px solid #cbd5e1",
-                  fontSize: 16
-                }}
-              />
-            </div>
-            <button
-              onClick={async () => {
-                setLoading(true);
-                setError("");
-                setShowSuccess(false);
-                setShowSummary(false);
-                setResults([]);
-                setPhase1Data([]);
-                try {
-                  const [tasks, runsheet, fallback] = await Promise.all([
-                    loadSheetData("Tasks"),
-                    loadSheetData("Runsheet"),
-                    loadSheetData("Fallback"),
-                  ]);
-                  setTasksData(tasks);
-                  setRunsheetData(runsheet);
-                  setFallbackData(fallback);
-                  const runsheetWithCBM = calculateRunsheetCBMWeight(runsheet, fallback);
-                  const updated = aggregateOrderMetrics(tasks, runsheetWithCBM);
-                  setPhase1Data(updated);
-                  // Assign only for the selected supplier
-                  const res = assignTripsWithSupplierLimit(
-                    updated,
-                    selectedSupplierForBox ? [selectedSupplierForBox] : [],
-                    truckTypeForBox,
-                    truckCountForBox
-                  );
-                  setResults(res);
-                } catch (e) {
-                  setError("Process failed: " + (e?.message || e));
-                }
-                setLoading(false);
-                setShowSuccess(true);
-                setPhase(4);
-                setShowSupplierLimitBox(false);
-              }}
-              disabled={
-                loading ||
-                !selectedSupplierForBox ||
-                !truckTypeForBox ||
-                !truckCountForBox
-              }
-              style={{
-                background: "linear-gradient(90deg, #be123c 0%, #fbbf24 100%)",
-                color: "#fff",
-                padding: "12px 28px",
-                borderRadius: 8,
-                fontWeight: 700,
-                fontSize: 16,
-                border: "none",
-                cursor: loading ? "not-allowed" : "pointer",
-                boxShadow: "0 2px 8px 0 rgba(251,191,36,0.08)",
-                minWidth: 160,
-                marginTop: 10
-              }}
-            >
-              Assign for Supplier
-            </button>
-            <button
-              onClick={() => setShowSupplierLimitBox(false)}
-              style={{
-                marginTop: 18,
-                background: "#e5e7eb",
-                color: "#1e293b",
-                padding: "10px 22px",
-                borderRadius: 8,
-                fontWeight: 600,
-                fontSize: 15,
-                border: "none",
-                cursor: "pointer"
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Loader animation CSS */}
       <style>
@@ -1162,14 +842,16 @@ const TripAssignment = () => {
             >
               <thead>
                 <tr style={{ background: "#e0e7ef" }}>
-                  {Object.keys(results[0]).map((col) => (
-                    <th
-                      key={col}
-                      style={{ padding: "10px 8px", fontWeight: 700, color: "#2563eb" }}
-                    >
-                      {col}
-                    </th>
-                  ))}
+                  {Object.keys(results[0])
+                    .filter(col => col !== "Merged_Trip_ID")
+                    .map((col) => (
+                      <th
+                        key={col}
+                        style={{ padding: "10px 8px", fontWeight: 700, color: "#2563eb" }}
+                      >
+                        {col}
+                      </th>
+                    ))}
                 </tr>
               </thead>
               <tbody>
@@ -1181,11 +863,13 @@ const TripAssignment = () => {
                       borderBottom: "1px solid #e0e7ef",
                     }}
                   >
-                    {Object.keys(row).map((col) => (
-                      <td key={col} style={{ padding: "8px 8px" }}>
-                        {row[col]}
-                      </td>
-                    ))}
+                    {Object.keys(row)
+                      .filter(col => col !== "Merged_Trip_ID")
+                      .map((col) => (
+                        <td key={col} style={{ padding: "8px 8px" }}>
+                          {row[col]}
+                        </td>
+                      ))}
                   </tr>
                 ))}
               </tbody>

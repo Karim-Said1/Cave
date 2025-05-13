@@ -1,0 +1,3 @@
+import { useGateValue } from '@statsig/react-bindings'
+
+const value = useGateValue("my_feature_gate");
