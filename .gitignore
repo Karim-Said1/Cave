@@ -13,7 +13,8 @@ node_modules
         "corejs": 3
       }
     ]
-  ]
+  ],
+  "outputDirectory": "dist"
 }
 node_modules
 node_modules
