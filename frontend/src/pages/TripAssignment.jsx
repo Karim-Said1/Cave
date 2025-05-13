@@ -9,6 +9,19 @@ import CBM from '../../../CBM.json';
 import CBM_Main from '../../../CBM_Main.json';
 import lottieload from '../../../lottieload.json';
 
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const CompressionPlugin = require('compression-webpack-plugin');
+
+module.exports = {
+  plugins: [
+    new BundleAnalyzerPlugin(),
+    new CompressionPlugin(),
+  ],
+  optimization: {
+    usedExports: true,
+  },
+};
+
 // --- Helper functions ported from Python ---
 
 function safeFloat(value, def = 0.0) {
