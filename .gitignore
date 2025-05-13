@@ -1,0 +1,6 @@
+node_modules
+node_modules
+node_modules
+"scripts": {
+  "dev": "webpack serve --mode development --open --hot"
+}
