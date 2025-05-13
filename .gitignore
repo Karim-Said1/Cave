@@ -3,4 +3,19 @@ node_modules
 node_modules
 "scripts": {
   "dev": "webpack serve --mode development --open --hot"
+},
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "useBuiltIns": "usage",
+        "corejs": 3
+      }
+    ]
+  ]
 }
+node_modules
+node_modules
+node_modules
+node_modules
