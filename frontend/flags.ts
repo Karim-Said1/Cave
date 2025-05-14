@@ -13,3 +13,10 @@ export const createFeatureGate = (key: string) => flag<boolean, StatsigUser>({
   adapter: statsigAdapter.featureGate((gate) => gate.value, {exposureLogging: true}),
   identify,
 });
+
+export const config = {
+  outputDirectory: "public",
+  rewrites: [
+    { source: "/(.*)", destination: "/index.html" }
+  ]
+};

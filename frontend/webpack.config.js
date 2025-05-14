@@ -5,7 +5,7 @@ const webpack = require('webpack');
 module.exports = {
   entry: './src/index.js',
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: __dirname + '/public',
     filename: 'bundle.js',
     publicPath: '/'
   },
@@ -17,23 +17,40 @@ module.exports = {
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env', '@babel/preset-react']
-          }
-        }
+        },
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
-      }
+        use: ['style-loader', 'css-loader'],
+      },
     ]
   },
   resolve: {
-    extensions: ['.js', '.jsx']
+    extensions: ['.js', '.jsx'],
+    fallback: {
+      "path": require.resolve("path-browserify"),
+      "stream": require.resolve("stream-browserify"),
+      "os": require.resolve("os-browserify/browser"),
+      "crypto": require.resolve("crypto-browserify"),
+      "zlib": require.resolve("browserify-zlib"),
+      "https": require.resolve("https-browserify"),
+      "http": require.resolve("stream-http"),
+      "url": require.resolve("url/"),
+      "vm": require.resolve("vm-browserify"),
+      "assert": require.resolve("assert/"),
+      "constants": require.resolve("constants-browserify"),
+      "fs": false,
+      "child_process": false,
+      "worker_threads": false,
+      "module": false,
+      "uglify-js": false,
+      "esbuild": false,
+      "@swc/core": false
+    }
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './public/index.html'
+      template: './public/index.html',
     }),
     new webpack.DefinePlugin({
       'process.env': {

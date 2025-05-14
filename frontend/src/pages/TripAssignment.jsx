@@ -5,9 +5,9 @@ import { saveAs } from "file-saver";
 import { getCBMWeightAppScriptStyle } from "./CBMCalculator";
 import Lottie from "lottie-react";
 import animationData from "../../../lottieload.json";
-import CBM from '/CBM.json';
-import CBM_Main from '/CBM_Main.json';
-import lottieload from '/lottieload.json';
+import CBM from '../../../CBM.json';
+import CBM_Main from '../../../CBM_Main.json';
+import lottieload from '../../../lottieload.json';
 
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const CompressionPlugin = require('compression-webpack-plugin');
