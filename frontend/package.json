@@ -9,6 +9,7 @@
     "constants-browserify": "^1.0.0",
     "crypto-browserify": "^3.12.1",
     "css-loader": "^7.1.2",
+    "express": "^5.1.0",
     "file-saver": "^2.0.5",
     "flags": "^4.0.0",
     "https-browserify": "^1.0.0",
@@ -33,7 +34,7 @@
   },
   "scripts": {
     "build": "webpack --mode production",
-    "vercel-build": "npm run build"
+    "start": "node server.js"
   },
   "devDependencies": {
     "@babel/core": "^7.27.1",
