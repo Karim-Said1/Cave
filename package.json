@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "dependencies": {
     "@statsig/react-bindings": "^3.16.2",
     "browserify-zlib": "^0.2.0",
@@ -11,25 +10,27 @@
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "stream-browserify": "^3.0.0",
-    "util": "^0.12.5"
+    "util": "^0.12.5",
+    "@remix-run/dev": "^2.16.6"
+
   },
   "devDependencies": {
     "@babel/core": "^7.27.1",
     "@babel/preset-env": "^7.27.2",
     "@babel/preset-react": "^7.27.1",
-    "babel-loader": "^10.0.0"
-=======
-  "name": "Dashboard-V2-main",
-  "lockfileVersion": 3,
-  "requires": true,
-  "packages": {
-    "": {
-      "dependencies": {
-        "file-saver": "^2.0.5",
-        "jspdf": "^3.0.1",
-        "jspdf-autotable": "^5.0.2"
-      }
+      "babel-loader": "^10.0.0",
+      "name": "Dashboard-V2-main"
     },
+    "lockfileVersion": "3",
+    "requires": "true",
+    "packages": {
+      "": {
+        "dependencies": {
+          "file-saver": "^2.0.5",
+          "jspdf": "^3.0.1",
+          "jspdf-autotable": "^5.0.2"
+        }
+      },
     "node_modules/@babel/runtime": {
       "version": "7.27.1",
       "resolved": "https://registry.npmjs.org/@babel/runtime/-/runtime-7.27.1.tgz",
@@ -266,8 +267,5 @@
         "base64-arraybuffer": "^1.0.2"
       }
     }
-  },
-  "dependencies": {
-    "@remix-run/dev": "^2.16.6"
   }
 }
