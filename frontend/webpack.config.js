@@ -25,10 +25,7 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['.js', '.jsx'],
-    fallback: {
-      querystring: require.resolve('querystring-es3')
-    }
+      fallback: { "querystring": require.resolve("querystring-es3") }
   },
   plugins: [
     new HtmlWebpackPlugin({
