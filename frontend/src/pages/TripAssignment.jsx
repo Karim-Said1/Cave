@@ -9,37 +9,6 @@ import CBM from '../../../CBM.json';
 import CBM_Main from '../../../CBM_Main.json';
 import lottieload from '../../../lottieload.json';
 
-module.exports = {
-  plugins: [
-    new BundleAnalyzerPlugin(),
-    new CompressionPlugin(),
-    // Add Buffer polyfill
-    new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer'],
-      process: 'process/browser',
-    }),
-  ],
-  optimization: {
-    usedExports: true,
-  },
-  resolve: {
-    fallback: {
-      path: require.resolve('path-browserify'),
-      crypto: require.resolve('crypto-browserify'),
-      zlib: require.resolve('browserify-zlib'),
-      stream: require.resolve('stream-browserify'),
-      util: require.resolve('util/'),
-      os: require.resolve('os-browserify/browser'),
-      buffer: require.resolve('buffer/'),
-      fs: false, // Disable fs as it's not available in the browser
-      http: require.resolve('stream-http'),
-      https: require.resolve('https-browserify'),
-      url: require.resolve('url/'),
-      vm: require.resolve('vm-browserify'),
-    },
-  },
-};
-
 // --- Helper functions ported from Python ---
 
 function safeFloat(value, def = 0.0) {
