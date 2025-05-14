@@ -32,7 +32,8 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "vercel-build": "npm run build"
   },
   "devDependencies": {
     "@babel/core": "^7.27.1",
