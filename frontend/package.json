@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "@flags-sdk/statsig": "^0.2.2",
-    "@remix-run/dev": "^2.16.6",
     "@statsig/react-bindings": "^3.16.2",
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
@@ -37,6 +36,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.27.1",
+    "@remix-run/dev": "^2.16.6",
     "@babel/preset-env": "^7.27.2",
     "@babel/preset-react": "^7.27.1",
     "babel-loader": "^10.0.0",
