@@ -1,25 +1,5 @@
 {
-<<<<<<< HEAD
-  "dependencies": {
-    "@statsig/react-bindings": "^3.16.2",
-    "browserify-zlib": "^0.2.0",
-    "buffer": "^6.0.3",
-    "crypto-browserify": "^3.12.1",
-    "file-saver": "^2.0.5",
-    "jspdf": "^3.0.1",
-    "jspdf-autotable": "^5.0.2",
-    "os-browserify": "^0.3.0",
-    "path-browserify": "^1.0.1",
-    "stream-browserify": "^3.0.0",
-    "util": "^0.12.5"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.27.1",
-    "@babel/preset-env": "^7.27.2",
-    "@babel/preset-react": "^7.27.1",
-    "babel-loader": "^10.0.0"
-=======
-  "name": "Dashboard-V2-main",
+  "name": "dashboard-v2-main",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
@@ -266,6 +246,5 @@
         "base64-arraybuffer": "^1.0.2"
       }
     }
->>>>>>> 69aca26314b735e711bcfdc49a1fb5f9795fae2d
   }
 }
