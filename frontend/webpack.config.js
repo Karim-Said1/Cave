@@ -45,7 +45,8 @@ module.exports = {
       "module": false,
       "uglify-js": false,
       "esbuild": false,
-      "@swc/core": false
+      "@swc/core": false,
+      "querystring": require.resolve("querystring-es3")
     }
   },
   plugins: [

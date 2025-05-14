@@ -9,11 +9,6 @@ import CBM from '../../../CBM.json';
 import CBM_Main from '../../../CBM_Main.json';
 import lottieload from '../../../lottieload.json';
 
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-const CompressionPlugin = require('compression-webpack-plugin');
-const path = require('path');
-const webpack = require('webpack');
-
 module.exports = {
   plugins: [
     new BundleAnalyzerPlugin(),
