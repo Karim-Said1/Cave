@@ -1,12 +1,12 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from './components/Navbar';
-import Dashboard from './pages/Dashboard';
-import DriversLocations from './pages/DriversLocations';
-import RetailersLocations from './pages/RetailersLocations';
-import CBMCalculator from './pages/CBMCalculator';
-import TripAssignment from './pages/TripAssignment';
-import SupplierTripAssignment from './pages/SupplierTripAssignment';
+import Dashboard from "./pages/Dashboard";
+import DriversLocations from "./pages/DriversLocations";
+import RetailersLocations from "./pages/RetailersLocations";
+import CBMCalculator from "./pages/CBMCalculator";
+import TripAssignment from "./pages/TripAssignment";
+import SupplierTripAssignment from "./pages/SupplierTripAssignment";
 
 function App() {
   return (
