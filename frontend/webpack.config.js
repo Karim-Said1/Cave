@@ -6,8 +6,9 @@ module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'public'),
-    filename: 'bundle.js',
-    publicPath: '/'
+    filename: 'bundle.[contenthash].js',
+    publicPath: '/',
+    clean: true
   },
   mode: 'production',
   module: {
@@ -47,10 +48,10 @@ module.exports = {
       "@swc/core": false,
       "querystring": require.resolve("querystring-es3")
     }
-  },
-  plugins: [
+  },  plugins: [
     new HtmlWebpackPlugin({
-      template: './public/index.html',
+      template: './src/index.html',
+      filename: 'index.html'
     }),
     new webpack.DefinePlugin({
       'process.env': {

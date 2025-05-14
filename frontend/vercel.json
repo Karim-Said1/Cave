@@ -1,6 +1,15 @@
-{
-  "buildCommand": "webpack --mode production",
-  "outputDirectory": "public",
-  "installCommand": "npm install",
-  "framework": "create-react-app"
+{  "version": 2,  "builds": [    {      "src": "package.json",      "use": "@vercel/static-build",
+      "config": {
+        "zeroConfig": true,
+        "buildCommand": "npm run build",
+        "outputDirectory": "public"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
