@@ -29,7 +29,9 @@
     "url": "^0.11.4",
     "util": "^0.12.5",
     "vm-browserify": "^1.1.2",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "@remix-run/dev": "^2.16.6"
+
   },
   "scripts": {
     "build": "webpack --mode production"
