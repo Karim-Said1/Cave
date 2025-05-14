@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "buildCommand": "npm install && npm run build",
+  "buildCommand": "webpack --mode production",
+  "outputDirectory": "public",
   "installCommand": "npm install",
-  "outputDirectory": "public"
+  "framework": "other"
 }
