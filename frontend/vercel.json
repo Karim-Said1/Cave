@@ -1,8 +1,7 @@
 {
-  "outputDirectory": "public",
+  "framework": "create-react-app",
   "buildCommand": "npm run build",
-  "installCommand": "npm install",
-  "framework": "react-router",
+  "outputDirectory": "public",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
