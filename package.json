@@ -11,7 +11,8 @@
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "stream-browserify": "^3.0.0",
-    "util": "^0.12.5"
+    "util": "^0.12.5",
+    "@remix-run/dev"
   },
   "devDependencies": {
     "@babel/core": "^7.27.1",
