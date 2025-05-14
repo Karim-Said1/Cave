@@ -6,8 +6,8 @@
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "public",
-        "buildCommand": "cd frontend && npm install && npm run build"
+        "distDir": "frontend/public",
+        "buildCommand": "cd frontend && npm install && npm run vercel-build"
       }
     }
   ],
