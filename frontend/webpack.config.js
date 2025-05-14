@@ -5,11 +5,11 @@ const webpack = require('webpack');
 module.exports = {
   entry: './src/index.js',
   output: {
-    path: __dirname + '/public',
+    path: path.resolve(__dirname, 'public'),
     filename: 'bundle.js',
     publicPath: '/'
   },
-  mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
+  mode: 'production',
   module: {
     rules: [
       {
@@ -26,19 +26,18 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['.js', '.jsx'],
-    fallback: {
-      "path": require.resolve("path-browserify"),
-      "stream": require.resolve("stream-browserify"),
-      "os": require.resolve("os-browserify/browser"),
-      "crypto": require.resolve("crypto-browserify"),
-      "zlib": require.resolve("browserify-zlib"),
-      "https": require.resolve("https-browserify"),
-      "http": require.resolve("stream-http"),
-      "url": require.resolve("url/"),
-      "vm": require.resolve("vm-browserify"),
-      "assert": require.resolve("assert/"),
-      "constants": require.resolve("constants-browserify"),
+    extensions: ['.js', '.jsx'],    fallback: {
+      "path": false,
+      "stream": false,
+      "os": false,
+      "crypto": false,
+      "zlib": false,
+      "https": false,
+      "http": false,
+      "url": false,
+      "vm": false,
+      "assert": false,
+      "constants": false,
       "fs": false,
       "child_process": false,
       "worker_threads": false,
