@@ -1,5 +1,8 @@
 {
   "outputDirectory": "public",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "react",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
