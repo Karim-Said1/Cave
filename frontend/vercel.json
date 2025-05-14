@@ -2,7 +2,7 @@
   "outputDirectory": "public",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "framework": "react",
+  "framework": "react-router",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
